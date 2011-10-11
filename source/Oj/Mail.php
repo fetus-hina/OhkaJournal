@@ -75,7 +75,7 @@ class Oj_Mail {
     }
 
     static private function procImagePart($mail, $content_type) {
-        $body = $mail->__toString();
+        $body = $mail->getContent();
         if($mail->headerExists('content-transfer-encoding')) {
             switch($mail->getHeader('content-transfer-encoding', 'string')) {
             case 'plain':
@@ -103,7 +103,6 @@ class Oj_Mail {
             } catch(Exception $e) {
             }
         }
-
         return
             (object)array(
                 'content_type'  => $content_type,

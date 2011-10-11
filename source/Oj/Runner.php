@@ -77,7 +77,7 @@ class Oj_Runner {
                 'Authorization' => $oauth,
                 'User-Agent'    => self::buildHttpUserAgent()));
         $client->setParameterPost($parameters);
-        foreach($postinfo->file as $i => $fileinfo) {
+        foreach($postinfo->file as $fileinfo) {
             $client->setFileUpload(
                 self::buildDummyFilename($fileinfo),
                 'media[]',
@@ -85,8 +85,6 @@ class Oj_Runner {
                 $fileinfo->content_type);
         }
         $resp = $client->request();
-        var_dump($resp->getBody());
-        //var_dump($client->getLastRequest());
     }
 
     static private function formatMessage(stdClass $postinfo) {
