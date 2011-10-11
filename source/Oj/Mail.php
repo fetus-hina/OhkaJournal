@@ -10,7 +10,7 @@ class Oj_Mail {
     }
 
     static private function procMail(Zend_Mail_Message_File $mail) {
-        $ret = (object)array('subject' => null, 'text' => null, 'file' => array());
+        $ret = (object)array('subject' => null, 'text' => null, 'file' => array(), 'gps' => null);
         $ret = self::mergeInfo($ret, self::procMailPart($mail));
         if($mail->isMultipart()) {
             foreach($mail as $part) {
@@ -40,31 +40,35 @@ class Oj_Mail {
             array(
                 'subject'   => null,
                 'text'      => null,
-                'file'      => array());
+                'file'      => array(),
+                'gps'       => null);
         if($mail->headerExists('subject')) {
             $ret['subject'] = $mail->subject;
         }
         if($mail->headerExists('content-type')) {
             $content_type = strtolower($mail->contentType);
             switch($content_type = strtok($content_type, ';')) {
-                case 'text/plain':
-                    //FIXME: charset
-                    $ret['text'] =
-                        preg_replace(
-                            '/[[:space:]]+/',
-                            ' ',
-                            trim(
-                                Normalizer::normalize(
-                                    mb_convert_encoding($mail->__toString(), 'UTF-8', 'ISO-2022-JP'))));
-                    break;
+            case 'text/plain':
+                //FIXME: charset
+                $ret['text'] =
+                    preg_replace(
+                        '/[[:space:]]+/',
+                        ' ',
+                        trim(
+                            Normalizer::normalize(
+                                mb_convert_encoding($mail->__toString(), 'UTF-8', 'ISO-2022-JP'))));
+                break;
 
-                case 'image/png':
-                case 'image/jpeg':
-                case 'image/gif':
-                    if($tmp = self::procImagePart($mail, $content_type)) {
-                        $ret['file'][] = $tmp;
+            case 'image/png':
+            case 'image/jpeg':
+            case 'image/gif':
+                if($tmp = self::procImagePart($mail, $content_type)) {
+                    $ret['file'][] = $tmp;
+                    if($tmp->gps && !$ret['gps']) {
+                        $ret['gps'] = $tmp->gps;
                     }
-                    break;
+                }
+                break;
             }
         }
         return (object)$ret;
@@ -90,9 +94,20 @@ class Oj_Mail {
         }
         imagedestroy($image);
         unset($image);
+
+        $gps = null;
+        if($content_type === 'image/jpeg') {
+            try {
+                $exif = new Oj_Exif($body);
+                $gps = $exif->gps;
+            } catch(Exception $e) {
+            }
+        }
+
         return
             (object)array(
                 'content_type'  => $content_type,
-                'binary'        => $body);
+                'binary'        => $body,
+                'gps'           => $gps);
     }
 }
