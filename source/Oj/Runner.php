@@ -24,6 +24,10 @@ class Oj_Runner {
             return null;
         }
         $parameters = array('status' => $status);
+        if($postinfo->gps) {
+            $parameters['lat']  = sprintf('%.6f', $postinfo->gps->latitude);
+            $parameters['long'] = sprintf('%.6f', $postinfo->gps->longitude);
+        }
         $config = Oj_Config::getInstance()->oauth;
         $oauth =
             Oj_OAuth::buildAuthorization(
@@ -49,6 +53,10 @@ class Oj_Runner {
     static private function postToTwitterMedia(stdClass $postinfo) {
         $uri = Zend_Uri::factory('https://upload.twitter.com/1/statuses/update_with_media.json');
         $parameters = array('status' => self::formatMessage($postinfo));
+        if($postinfo->gps) {
+            $parameters['lat']  = sprintf('%.6f', $postinfo->gps->latitude);
+            $parameters['long'] = sprintf('%.6f', $postinfo->gps->longitude);
+        }
         $config = Oj_Config::getInstance()->oauth;
         $oauth =
             Oj_OAuth::buildAuthorization(
@@ -78,7 +86,7 @@ class Oj_Runner {
         }
         $resp = $client->request();
         var_dump($resp->getBody());
-        var_dump($client->getLastRequest());
+        //var_dump($client->getLastRequest());
     }
 
     static private function formatMessage(stdClass $postinfo) {
@@ -107,7 +115,7 @@ class Oj_Runner {
         return
             sprintf(
                 '%s.%s',
-                Oj_Uuid::factoryV4()->__toString(),
+                Oj_Uuid::factory()->__toString(),
                 self::getStandardExtension($fileinfo->content_type));
     }
 
