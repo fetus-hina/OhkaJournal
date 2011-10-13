@@ -1,0 +1,17 @@
+* メールで投稿した内容/画像を Twitter に投稿するスクリプトです。
+
+* 画像は Twitter の画像アップロード API を使用して投稿されます。
+  URL は多分 pic.twitter.com になります。
+
+* エラー処理何それおいしいの
+
+* 動作には多分次のような環境が必要です。
+      PHP 5.3 (cli)
+      mbstring や icon の拡張
+      Zend Framework
+      sendmail や postfix
+  動かなかったらエラーをもとにいろいろ試して下さい。
+
+* /etc/alias あたりに、
+      virtual_user_name: |"/usr/bin/php /path/to/source/mailpost_runner.php"
+  とか書いて動かします。
